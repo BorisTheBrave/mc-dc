@@ -6,7 +6,7 @@ import numpy.linalg
 # Both marching cube and dual contouring are adaptive, i.e. they select
 # the vertex that best describes the underlying function. But for illustrative purposes
 # you can turn this off, and simply select the midpoint vertex.
-ADAPTIVE = False
+ADAPTIVE = True
 
 # Bounds to evaluate over
 XMIN = -3
