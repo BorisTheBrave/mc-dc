@@ -2,42 +2,14 @@ import math
 import numpy
 import numpy.linalg
 
+from common import Edge, adapt
+from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX
 
-# Both marching cube and dual contouring are adaptive, i.e. they select
-# the vertex that best describes the underlying function. But for illustrative purposes
-# you can turn this off, and simply select the midpoint vertex.
-ADAPTIVE = True
-
-# Bounds to evaluate over
-XMIN = -3
-XMAX = 3
-YMIN = -3
-YMAX = 3
 
 class V2:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
-class Edge:
-    def __init__(self, v1, v2):
-        self.v1 = v1
-        self.v2 = v2
-
-    def swap(self, swap=True):
-        if swap:
-            return Edge(self.v2, self.v1)
-        else:
-            return Edge(self.v1, self.v2)
-
-
-def adapt(v0, v1):
-    """v0 and v1 are numbers of opposite sign. This returns how far you need to interpolate from v0 to v1 to get to 0."""
-    assert (v1 > 0) != (v0 > 0), "v0 and v1 do not have opposite sign"
-    if ADAPTIVE:
-        return (0 - v0) / (v1 - v0)
-    else:
-        return 0.5
 
 
 def marching_cubes_2d_single_cell(f, x, y):
@@ -103,7 +75,7 @@ def marching_cubes_2d(f, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
     return edges
 
 
-def dual_cont_2d_find_best_vertext(f, f_normal, x, y):
+def dual_cont_2d_find_best_vertex(f, f_normal, x, y):
     if not ADAPTIVE:
         return V2(x+0.5, y+0.5)
 
@@ -149,7 +121,7 @@ def dual_cont_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
     verts = {}
     for x in range(xmin, xmax):
         for y in range(ymin, ymax):
-            verts[(x,y)] = dual_cont_2d_find_best_vertext(f, f_normal, x, y)
+            verts[(x,y)] = dual_cont_2d_find_best_vertex(f, f_normal, x, y)
     # For each cell edge, emit an edge between the center of the adjacent cells if it is a sign changing edge
     edges = []
     for x in range(xmin+1, xmax):
