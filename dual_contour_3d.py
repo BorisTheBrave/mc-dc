@@ -2,26 +2,8 @@ from common import adapt
 from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
 import numpy as np
 import math
+from utils_3d import V3, Quad, make_obj
 
-class V3:
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-
-class Quad:
-    def __init__(self, v1, v2, v3, v4):
-        self.v1 = v1
-        self.v2 = v2
-        self.v3 = v3
-        self.v4 = v4
-
-    def swap(self, swap=True):
-        if swap:
-            return Quad(self.v4, self.v3, self.v2, self.v1)
-        else:
-            return Quad(self.v1, self.v2, self.v3, self.v4)
 
 
 def dual_cont_3d_find_best_vertex(f, f_normal, x, y, z):
@@ -133,13 +115,6 @@ def circle_normal(x, y, z):
     l = math.sqrt(x*x + y*y + z*z)
     return V3(-x / l, -y / l, -z / l)
 
-
-def make_obj(f, vert_array, faces):
-    """Crude export to Wafefront mesh format"""
-    for v in vert_array:
-        f.write("v {} {} {}\n".format(v.x, v.y, v.z))
-    for face in faces:
-        f.write("f {} {} {} {}\n".format(face.v1, face.v2, face.v3, face.v4))
 
 if __name__ == "__main__":
     vert_array, faces = dual_cont_3d(circle_function, circle_normal)
