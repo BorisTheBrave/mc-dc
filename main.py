@@ -21,7 +21,8 @@ def marching_cubes_2d_single_cell(f, x, y):
     x1y0 = f(x + 1.0, y + 0.0)
     x1y1 = f(x + 1.0, y + 1.0)
 
-    # There are 16 different cases that these points can be inside or outside
+    # There are 16 different cases that these points can be inside or outside.
+	# We use binary counting to map the 4 truth values to a number between 0 and 15 inclusive.
     # It's even more in the 3d case!
     case = ((1 if x0y0 > 0 else 0) +
             (2 if x0y1 > 0 else 0) +
@@ -31,6 +32,8 @@ def marching_cubes_2d_single_cell(f, x, y):
     # Several of the cases are inverses of each other where solid is non solid and visa versa
     # They have the same boundary, which cuts down the cases a bit.
     # But we swap the direction of the boundary, so that edges are always winding clockwise around the solid.
+	# Getting those swaps correct isn't needed for our simple visualizations, but is important in other uses cases
+	# particularly in 3d.
 
     if case is 0 or case is 15:
         # All outside / inside
@@ -144,6 +147,7 @@ def dual_cont_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
 
 
 def element(e, **kwargs):
+    """Utility function used for rendering svg"""
     s = "<" + e
     for key, value in kwargs.items():
         s += " {}='{}'".format(key, value)
@@ -152,8 +156,10 @@ def element(e, **kwargs):
 
 
 def make_svg(file):
+    """Evaluates the chosing meshing algorithm, and writes an svg file showing the results"""
     f = circle_function
-    f_norm = circle_normal
+    #f_norm = circle_normal
+    f_norm = normal_from_function(f)
     #f = square_function
     #f_norm = square_normal
     #f = t_shape_function
@@ -209,6 +215,14 @@ def square_normal(x, y):
         return V2(-math.copysign(x, 1), 0)
     else:
         return V2(0, -math.copysign(y, 1))
+
+def normal_from_function(f, d=0.01):
+    def norm(x, y):
+        return V2(
+            (f(x + d, y) - f(x - d, y)) / 2 / d,
+            (f(x, y + d) - f(x, y - d)) / 2 / d,
+        )
+    return norm
 
 
 def t_shape_function(x, y):
