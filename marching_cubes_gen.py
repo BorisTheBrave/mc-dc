@@ -79,9 +79,9 @@ INVERSE_CASES = {
     255 - 0b00000101: ((3, 2, 8), (8, 2, 10), (8, 10, 1), (8, 1, 0)),
     255 - 0b01000011: ((6, 8, 3), (6, 9, 8), (6, 5, 9),  (6, 3, 1), (6, 10, 1)),
     255 - 0b01001010: ((3, 11, 0), (0, 11, 6), (0, 6, 9), (9, 6, 5), (1, 10, 2)),
-    # ?? Docs say this case is needed, but it isn't
+    # ?? Docs say these case is needed, but it doesn't appear to be
     # 255 - 0b01101001: ((8, 11, 4), (4, 11, 6), (9, 10, 2), (9, 2, 0)),
-    255 - 0b00111010: ((8, 0, 3), (2, 7, 11), (7, 2, 1), (7, 1, 5)),
+    # 255 - 0b00111010: ((8, 0, 3), (2, 7, 11), (7, 2, 1), (7, 1, 5)),
     # ?? Docs say this case is needed, but it looks wrong
     #255 - 0b10100101: ((3, 2, 11), (0, 9, 1), (6, 10, 5), (7, 4, 8)),
 }
@@ -223,11 +223,15 @@ def test1():
             assert sum(v in verts for v in EDGES[edge]) == 1
 
 
+def faces_to_edge_pairs(faces):
+    return [frozenset([face[i], face[(i + 1) % 3]]) for face in faces for i in range(3)]
+
+
 # Check that each case is manifold (except on the cell boundary)
 def test2():
     from collections import Counter
     for bits in range(256):
-        edge_pairs = [frozenset([face[i], face[(i+1) % 3]]) for face in cases[bits] for i in range(3)]
+        edge_pairs = faces_to_edge_pairs(cases[bits])
         edge_counts = Counter(edge_pairs)
         for edge_pair, count in edge_counts.items():
             # Ok, this edge_pair is used by two faces, forming a continuous surface
@@ -249,8 +253,34 @@ def test2():
                 continue
             assert False
 
+
+# Check that every face with the same solid/non-solid pattern also has the same edge pattern
+def test3():
+    CELL_FACES = [
+        [0, 1, 2, 3],
+        [1, 5, 6, 2],
+        [3, 2, 6, 7],
+        [4, 0, 3, 7],
+        [1, 0, 4, 5],
+        [7, 6, 5, 4],
+    ]
+    for cell_face in CELL_FACES:
+        def edge_pair_on_face(edge_pair):
+            return all(v in cell_face for e in edge_pair for v in EDGES[e])
+        edges_by_case = {}
+        for bits in range(256):
+            edge_pairs = faces_to_edge_pairs(cases[bits])
+            sub_bits = verts_to_bits(set(cell_face) & set(bits_to_verts(bits)))
+            sub_edge_pairs = frozenset(filter(edge_pair_on_face, edge_pairs))
+            if sub_bits in edges_by_case:
+                assert edges_by_case[sub_bits] == sub_edge_pairs
+            else:
+                edges_by_case[sub_bits] = sub_edge_pairs
+
+
 test1()
 test2()
+test3()
 
 # Dump out the results
 # Important - we've made no attempt to deal with ambiguities when inverting
