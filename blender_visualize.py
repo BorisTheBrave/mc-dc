@@ -66,7 +66,7 @@ def blender_render(obj_file, output_render):
         #bpy.context.area.type = 'VIEW_3D'
         #bpy.context.space_data.context = 'OBJECT'
         orig_mesh.keyframe_insert('rotation_euler',group="Rot")
-        bpy.context.scene.frame_end = 100
+        bpy.context.scene.frame_end = 25
         bpy.context.scene.frame_current = 101
         bpy.context.object.rotation_euler[2] = 6.28319
         orig_mesh.keyframe_insert('rotation_euler',group="Rot")
