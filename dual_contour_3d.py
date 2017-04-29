@@ -2,7 +2,7 @@ from common import adapt
 from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
 import numpy as np
 import math
-from utils_3d import V3, Quad, make_obj
+from utils_3d import V3, Quad, Mesh, make_obj
 
 
 
@@ -104,7 +104,7 @@ def dual_cont_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=Z
                             vert_indices[(x, y - 1, z - 0)],
                         ).swap(solid2))
 
-    return vert_array, faces
+    return Mesh(vert_array, faces)
 
 
 def circle_function(x, y, z):
@@ -117,6 +117,6 @@ def circle_normal(x, y, z):
 
 
 if __name__ == "__main__":
-    vert_array, faces = dual_cont_3d(circle_function, circle_normal)
+    mesh = dual_cont_3d(circle_function, circle_normal)
     with open("output.obj", "w") as f:
-        make_obj(f, vert_array, faces)
+        make_obj(f, mesh)
