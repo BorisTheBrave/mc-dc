@@ -86,13 +86,14 @@ INVERSE_CASES = {
     #255 - 0b10100101: ((3, 2, 11), (0, 9, 1), (6, 10, 5), (7, 4, 8)),
 }
 
-# Add INVERSE_CASES to BASE_CASES
+ALL_CASES = BASE_CASES.copy()
+
+# Add INVERSE_CASES to ALL_CASES
 for bits, faces in INVERSE_CASES.items():
-    BASE_CASES[bits] = faces
+    ALL_CASES[bits] = faces
 
 
-
-# Most opererations are simply vertex permutations
+# Most operations are simply vertex permutations
 ROTATE_1 = [
     1,
     2,
@@ -205,7 +206,7 @@ for invert in (False, True):  # Invert swaps solid for empty and visa versa
                     )
                     # Both REFLECT and invert cause faces to flip
                     flip = invert ^ (refl == 1)
-                    for bits, faces in BASE_CASES.items():
+                    for bits, faces in ALL_CASES.items():
                         new_bits = bits_apply(op, bits)
                         if invert:
                             new_bits = 255 - new_bits
@@ -278,13 +279,12 @@ def test3():
                 edges_by_case[sub_bits] = sub_edge_pairs
 
 
-test1()
-test2()
-test3()
+if __name__ == "__main__":
+    # Run a few tests that we've generated something sensible
+    test1()
+    test2()
+    test3()
 
-# Dump out the results
-# Important - we've made no attempt to deal with ambiguities when inverting
-# which means the generated meshes can have holes in. Dealing with this
-# is out of scope at present.
-import pprint
-pprint.pprint([cases[i] for i in range(256)])
+    # Dump out the results
+    import pprint
+    pprint.pprint([cases[i] for i in range(256)])

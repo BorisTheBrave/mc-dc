@@ -372,7 +372,7 @@ def make_cases_obj():
     mesh = Mesh()
     highlights = Mesh()
     offset = V3(0, 0, 0)
-    for bits, faces in gen.BASE_CASES.items():
+    for bits, faces in sorted(gen.BASE_CASES.items()):
         verts = set(gen.bits_to_verts(bits))
 
         # Run marching cubes for a just this case
