@@ -1,3 +1,5 @@
+"""Contains utilities common to all meshing methods"""
+
 import settings
 
 class Edge:

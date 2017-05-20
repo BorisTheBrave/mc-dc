@@ -1,10 +1,15 @@
+"""Contains utilities common to 3d meshing methods"""
+
+
 class V3:
+    """A vector in 3D space"""
     def __init__(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
 
 class Tri:
+    """A 3d triangle"""
     def __init__(self, v1, v2, v3):
         self.v1 = v1
         self.v2 = v2
@@ -15,6 +20,7 @@ class Tri:
 
 
 class Quad:
+    """A 3d quadrilateral (polygon with 4 vertices)"""
     def __init__(self, v1, v2, v3, v4):
         self.v1 = v1
         self.v2 = v2
@@ -24,14 +30,15 @@ class Quad:
     def map(self, f):
         return Quad(f(self.v1), f(self.v2), f(self.v3), f(self.v4))
 
-
     def swap(self, swap=True):
         if swap:
             return Quad(self.v4, self.v3, self.v2, self.v1)
         else:
             return Quad(self.v1, self.v2, self.v3, self.v4)
 
+
 class Mesh:
+    """A collection of vertices, and faces between those vertices."""
     def __init__(self, verts=None, faces=None):
         self.verts = verts or []
         self.faces = faces or []
@@ -51,6 +58,7 @@ class Mesh:
     def translate(self, offset):
         new_verts = [V3(v.x + offset.x, v.y + offset.y, v.z + offset.z) for v in self.verts]
         return Mesh(new_verts, self.faces)
+
 
 def make_obj(f, mesh):
     """Crude export to Wavefront mesh format"""

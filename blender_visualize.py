@@ -1,11 +1,8 @@
-#!/usr/bin/python3
+"""Utility for invoking blender and rending .obj files"""
+
 import subprocess
 import os
-import io
-import re
-import hashlib
 import tempfile
-import concurrent.futures
 
 blender_bin = r"C:\Program Files\Blender Foundation\Blender\blender.exe"
 assert os.path.exists(blender_bin)

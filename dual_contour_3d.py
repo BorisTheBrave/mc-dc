@@ -1,9 +1,10 @@
+"""Provides a function for performing 3D Dual Countouring"""
+
 from common import adapt
 from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
 import numpy as np
 import math
 from utils_3d import V3, Quad, Mesh, make_obj
-
 
 
 def dual_cont_3d_find_best_vertex(f, f_normal, x, y, z):
@@ -56,6 +57,8 @@ def dual_cont_3d_find_best_vertex(f, f_normal, x, y, z):
 
 
 def dual_cont_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=ZMIN, zmax=ZMAX):
+    """Iterates over a cells of size one between the specified range, and evaluates f and f_normal to produce
+        a boundary by Dual Contouring. Returns a Mesh object."""
     # For each cell, find the the best vertex for fitting f
     vert_array = []
     vert_indices = {}
@@ -115,6 +118,17 @@ def circle_normal(x, y, z):
     l = math.sqrt(x*x + y*y + z*z)
     return V3(-x / l, -y / l, -z / l)
 
+
+def normal_from_function(f, d=0.01):
+    """Given a sufficiently smooth 3d function, f, returns a function approximating of the gradient of f.
+    d controls the scale, smaller values are a more accurate approximation."""
+    def norm(x, y, z):
+        return V3(
+            (f(x + d, y, z) - f(x - d, y, z)) / 2 / d,
+            (f(x, y + d, z) - f(x, y - d, z)) / 2 / d,
+            (f(x, y, z + d) - f(x, y, z - d)) / 2 / d,
+        )
+    return norm
 
 if __name__ == "__main__":
     mesh = dual_cont_3d(circle_function, circle_normal)

@@ -1,10 +1,12 @@
+"""Contains utilities common to 2d meshing methods"""
+
 from settings import XMIN, XMAX, YMIN, YMAX
+
 
 class V2:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
 
 
 def element(e, **kwargs):
@@ -17,7 +19,7 @@ def element(e, **kwargs):
 
 
 def make_svg(file, edges, f):
-    """Evaluates the chosing meshing algorithm, and writes an svg file showing the results"""
+    """Writes an svg file showing the given edges and solidity"""
     scale = 50
     file.write("<svg viewBox='{} {} {} {}'>\n".format(
         XMIN*scale, YMIN*scale, (XMAX-XMIN)*scale, (YMAX-YMIN)*scale))

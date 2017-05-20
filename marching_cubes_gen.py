@@ -1,4 +1,5 @@
-# Generates the 256 cases of marching cubes
+"""Reggenerates the 256 cases needed for the 3D Marching Cubes look up table. There's no need to run this,
+the values have already been hard coded into marching_cubes_3d"""
 
 # My convention for vertices is:
 VERTICES = [

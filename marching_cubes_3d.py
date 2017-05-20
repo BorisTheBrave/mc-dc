@@ -1,5 +1,7 @@
+"""Provides a function for performing 3D Marching Cubes"""
+
 from common import adapt
-from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
+from settings import XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
 import math
 from utils_3d import V3, Tri, Mesh, make_obj
 
@@ -296,7 +298,6 @@ cases = [[],
  []]
 
 
-
 def marching_cubes_3d_single_cell(f, x, y, z):
     # Evaluate f on each vertex of the cube
     f_eval = [None] * 8
@@ -344,6 +345,8 @@ def marching_cubes_3d_single_cell(f, x, y, z):
 
 
 def marching_cubes_3d(f, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=ZMIN, zmax=ZMAX):
+    """Iterates over a cells of size one between the specified range, and evaluates f to produce
+        a boundary by Marching Cubes. Returns a Mesh object."""
     # For each cube, evaluate independently.
     # If this wasn't demonstration code, you might actually evaluate them together for efficiency
     mesh = Mesh()

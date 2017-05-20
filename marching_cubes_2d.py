@@ -1,9 +1,9 @@
+"""Provides a function for performing 2D Marching Cubes"""
+
 import math
-import numpy
-import numpy.linalg
 
 from common import Edge, adapt
-from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX
+from settings import XMIN, XMAX, YMIN, YMAX
 from utils_2d import V2, make_svg
 
 

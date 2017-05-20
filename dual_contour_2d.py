@@ -1,3 +1,5 @@
+"""Provides a function for performing 2D Dual Contouring"""
+
 import math
 import numpy
 import numpy.linalg
@@ -49,6 +51,8 @@ def dual_cont_2d_find_best_vertex(f, f_normal, x, y):
 
 
 def dual_cont_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
+    """Iterates over a cells of size one between the specified range, and evaluates f and f_normal to produce
+    a boundary by Dual Contouring. Returns an unordered list of Edge objects."""
     # For each cell, find the the best vertex for fitting f
     verts = {}
     for x in range(xmin, xmax):
@@ -96,6 +100,8 @@ def square_normal(x, y):
 
 
 def normal_from_function(f, d=0.01):
+    """Given a sufficiently smooth 2d function, f, returns a function approximating of the gradient of f.
+    d controls the scale, smaller values are a more accurate approximation."""
     def norm(x, y):
         return V2(
             (f(x + d, y) - f(x - d, y)) / 2 / d,
