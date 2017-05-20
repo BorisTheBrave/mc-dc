@@ -7,7 +7,7 @@ import math
 from utils_3d import V3, Quad, Mesh, make_obj
 
 
-def dual_cont_3d_find_best_vertex(f, f_normal, x, y, z):
+def dual_contour_3d_find_best_vertex(f, f_normal, x, y, z):
     if not ADAPTIVE:
         return V3(x+0.5, y+0.5, z+0.5)
 
@@ -56,7 +56,7 @@ def dual_cont_3d_find_best_vertex(f, f_normal, x, y, z):
     return V3(result[0], result[1], result[2])
 
 
-def dual_cont_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=ZMIN, zmax=ZMAX):
+def dual_contour_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=ZMIN, zmax=ZMAX):
     """Iterates over a cells of size one between the specified range, and evaluates f and f_normal to produce
         a boundary by Dual Contouring. Returns a Mesh object."""
     # For each cell, find the the best vertex for fitting f
@@ -65,7 +65,7 @@ def dual_cont_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=Z
     for x in range(xmin, xmax):
         for y in range(ymin, ymax):
             for z in range(zmin, zmax):
-                vert = dual_cont_3d_find_best_vertex(f, f_normal, x, y, z)
+                vert = dual_contour_3d_find_best_vertex(f, f_normal, x, y, z)
                 if vert is None:
                     continue
                 vert_array.append(vert)
@@ -130,7 +130,9 @@ def normal_from_function(f, d=0.01):
         )
     return norm
 
+__all__ = ["dual_contour_3d"]
+
 if __name__ == "__main__":
-    mesh = dual_cont_3d(circle_function, circle_normal)
+    mesh = dual_contour_3d(circle_function, circle_normal)
     with open("output.obj", "w") as f:
         make_obj(f, mesh)

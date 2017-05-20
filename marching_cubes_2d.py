@@ -86,6 +86,8 @@ def t_shape_function(x, y):
         return 1
     return -1
 
+__all__ = ["marching_cubes_2d"]
+
 if __name__ == "__main__":
     edges = marching_cubes_2d(circle_function)
     with open("example.svg", "w") as file:

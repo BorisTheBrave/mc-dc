@@ -9,7 +9,7 @@ from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX
 from utils_2d import V2, make_svg
 
 
-def dual_cont_2d_find_best_vertex(f, f_normal, x, y):
+def dual_contour_2d_find_best_vertex(f, f_normal, x, y):
     if not ADAPTIVE:
         return V2(x+0.5, y+0.5)
 
@@ -50,14 +50,14 @@ def dual_cont_2d_find_best_vertex(f, f_normal, x, y):
     return V2(result[0], result[1])
 
 
-def dual_cont_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
+def dual_contour_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
     """Iterates over a cells of size one between the specified range, and evaluates f and f_normal to produce
     a boundary by Dual Contouring. Returns an unordered list of Edge objects."""
     # For each cell, find the the best vertex for fitting f
     verts = {}
     for x in range(xmin, xmax):
         for y in range(ymin, ymax):
-            verts[(x,y)] = dual_cont_2d_find_best_vertex(f, f_normal, x, y)
+            verts[(x,y)] = dual_contour_2d_find_best_vertex(f, f_normal, x, y)
     # For each cell edge, emit an edge between the center of the adjacent cells if it is a sign changing edge
     edges = []
     for x in range(xmin+1, xmax):
@@ -115,8 +115,10 @@ def t_shape_function(x, y):
         return 1
     return -1
 
+__all__ = ["dual_contour_2d"]
+
 if __name__ == "__main__":
-    edges = dual_cont_2d(circle_function, circle_normal)
+    edges = dual_contour_2d(circle_function, circle_normal)
     with open("example.svg", "w") as file:
         make_svg(file, edges, circle_function)
 

@@ -401,6 +401,7 @@ def make_cases_obj():
     with open("case_highlights.obj", "w") as f:
         make_obj(f, highlights)
 
+__all__ = ["marching_cubes_3d"]
 
 if __name__ == "__main__":
     make_circle_obj("output.obj")
