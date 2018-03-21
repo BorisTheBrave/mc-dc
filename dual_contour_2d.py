@@ -1,12 +1,12 @@
 """Provides a function for performing 2D Dual Contouring"""
 
 import math
-import numpy
-import numpy.linalg
+
 
 from common import Edge, adapt
 from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX
 from utils_2d import V2, make_svg
+from qef import solve_qef_2d
 
 
 def dual_contour_2d_find_best_vertex(f, f_normal, x, y):
@@ -22,33 +22,27 @@ def dual_contour_2d_find_best_vertex(f, f_normal, x, y):
     # For each edge, identify where there is a sign change
     changes = []
     if (x0y0 > 0) != (x0y1 > 0):
-        changes.append(V2(x + 0, y + adapt(x0y0, x0y1)))
+        changes.append([x + 0, y + adapt(x0y0, x0y1)])
     if (x1y0 > 0) != (x1y1 > 0):
-        changes.append(V2(x + 1, y + adapt(x1y0, x1y1)))
+        changes.append([x + 1, y + adapt(x1y0, x1y1)])
     if (x0y0 > 0) != (x1y0 > 0):
-        changes.append(V2(x + adapt(x0y0, x1y0), y + 0))
+        changes.append([x + adapt(x0y0, x1y0), y + 0])
     if (x0y1 > 0) != (x1y1 > 0):
-        changes.append(V2(x + adapt(x0y1, x1y1), y + 1))
+        changes.append([x + adapt(x0y1, x1y1), y + 1])
 
     if len(changes) <= 1:
         return None
 
     # For each sign change location v[i], we find the normal n[i].
-    # The error term we are trying to minimize is sum( dot(x-v[i], n[i]) ^ 2)
-
-    # In other words, minimize || A * x - b || ^2 where A and b are a matrix and vector
-    # derived from v and n
 
     normals = []
     for v in changes:
-        n = f_normal(v.x, v.y)
+        n = f_normal(v[0], v[1])
         normals.append([n.x, n.y])
 
-    A = numpy.array(normals)
-    b = [v.x*n[0]+v.y*n[1] for v, n in zip(changes, normals)]
-    result, residual, rank, s = numpy.linalg.lstsq(A, b)
-    return V2(result[0], result[1])
+    v = solve_qef_2d(x, y, changes, normals)
 
+    return v
 
 def dual_contour_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
     """Iterates over a cells of size one between the specified range, and evaluates f and f_normal to produce
@@ -98,7 +92,6 @@ def square_normal(x, y):
     else:
         return V2(0, -math.copysign(y, 1))
 
-
 def normal_from_function(f, d=0.01):
     """Given a sufficiently smooth 2d function, f, returns a function approximating of the gradient of f.
     d controls the scale, smaller values are a more accurate approximation."""
@@ -106,8 +99,9 @@ def normal_from_function(f, d=0.01):
         return V2(
             (f(x + d, y) - f(x - d, y)) / 2 / d,
             (f(x, y + d) - f(x, y - d)) / 2 / d,
-        )
+        ).normalize()
     return norm
+
 
 
 def t_shape_function(x, y):
@@ -115,10 +109,19 @@ def t_shape_function(x, y):
         return 1
     return -1
 
+
+def intersect_function(x, y):
+    y -= 0.3
+    x -= 0.5
+    x = abs(x)
+    #x += x*x / 1000
+    return min(x - y, x + y)
+
+
 __all__ = ["dual_contour_2d"]
 
 if __name__ == "__main__":
-    edges = dual_contour_2d(circle_function, circle_normal)
+    edges = dual_contour_2d(intersect_function, normal_from_function(intersect_function, 0.001))
     with open("example.svg", "w") as file:
-        make_svg(file, edges, circle_function)
+        make_svg(file, edges, intersect_function)
 
