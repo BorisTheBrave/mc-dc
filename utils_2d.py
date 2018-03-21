@@ -1,12 +1,16 @@
 """Contains utilities common to 2d meshing methods"""
 
 from settings import XMIN, XMAX, YMIN, YMAX
-
+import math
 
 class V2:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def normalize(self):
+        d = math.sqrt(self.x*self.x+self.y*self.y)
+        return V2(self.x / d, self.y / d)
 
 
 def element(e, **kwargs):
@@ -21,7 +25,8 @@ def element(e, **kwargs):
 def make_svg(file, edges, f):
     """Writes an svg file showing the given edges and solidity"""
     scale = 50
-    file.write("<svg viewBox='{} {} {} {}'>\n".format(
+    file.write("<?xml version='1.0' encoding='UTF-8'?>\n")
+    file.write("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='{} {} {} {}'>\n".format(
         XMIN*scale, YMIN*scale, (XMAX-XMIN)*scale, (YMAX-YMIN)*scale))
 
     # Draw grid
