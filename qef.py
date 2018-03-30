@@ -6,7 +6,7 @@ from utils_2d import V2
 CLIP = False
 BOUNDARY = True
 BIAS = True
-BIAS_STRENGTH = 0.1
+BIAS_STRENGTH = 0.01
 
 
 class QEF:
@@ -76,17 +76,25 @@ def solve_qef_2d(x, y, positions, normals):
     # The heavy lifting is done by the QEF class, but this function includes some important
     # tricks to cope with edge cases
 
+    # This is demonstration code and isn't optimized, there are many good C++ implementations
+    # out there if you need speed.
+
     if BIAS:
         # Add extra normals that add extra error the further we go
-        # from the center, this biases the final result to be
-        # away from the boundary.
+        # from the cell, this encourages the final result to be
+        # inside the cell
         # These normals are shorter than the input normals
         # as that makes the bias weaker,  we want them to only
         # really be important when the input is ambiguous
+
+        # Take a simple average of positions as the point we will
+        # pull towards.
+        mass_point = numpy.mean(positions, axis=0)
+
         normals.append([BIAS_STRENGTH, 0])
-        positions.append([x+0.5, y])
+        positions.append(mass_point)
         normals.append([0, BIAS_STRENGTH])
-        positions.append([x, y+0.5])
+        positions.append(mass_point)
 
     qef = QEF.make(positions, normals)
 
