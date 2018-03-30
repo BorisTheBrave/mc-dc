@@ -7,13 +7,15 @@ There's also additional code to nicely render the results, but that is not polis
  
 # Usage
  
-Simply load one of the 4 modules and use the function side of the same name.
+Simply import one of `marching_cubes_2d.marching_cubes_2d`, `marching_cubes_3d.marching_cubes_3d`,
+`dual_contour_2d.dual_contour_2d`, `dual_contour_3d.dual_contour_3d`.
 
-The meshing function takes an evaluation function, f, that determines whether a point is inside or outside
+Each function takes an evaluation function, `f`, that determines whether a point is inside or outside
 by returning a positive or negative number. The Dual Contouring functions take an additional argument, 
-f_normal, that returns the gradient as a V2 or V3 object.
+`f_normal`, that returns the gradient as a `V2` or `V3` object. You can optionally pass the range of values
+to evaluate f over. The cell size is always 1.
 
-The 2d meshing functions return a unordered list of Edge objects, the 3d ones return a Mesh object.
+The 2d meshing functions return a unordered list of `common.Edge` objects, the 3d ones return a `utils_3d.Mesh` object.
 
 # License
 
