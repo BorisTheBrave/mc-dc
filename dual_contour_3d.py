@@ -5,13 +5,14 @@ from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
 import numpy as np
 import math
 from utils_3d import V3, Quad, Mesh, make_obj
+from qef import solve_qef_3d
 
 
 def dual_contour_3d_find_best_vertex(f, f_normal, x, y, z):
     if not ADAPTIVE:
         return V3(x+0.5, y+0.5, z+0.5)
 
-    # Evaluate at each corner
+    # Evaluate f at each corner
     v = np.empty((2, 2, 2))
     for dx in (0, 1):
         for dy in (0, 1):
@@ -24,17 +25,17 @@ def dual_contour_3d_find_best_vertex(f, f_normal, x, y, z):
     for dx in (0, 1):
         for dy in (0, 1):
             if (v[dx, dy, 0] > 0) != (v[dx, dy, 1] > 0):
-                changes.append(V3(x + dx, y + dy, z + adapt(v[dx, dy, 0], v[dx, dy, 1])))
+                changes.append((x + dx, y + dy, z + adapt(v[dx, dy, 0], v[dx, dy, 1])))
 
     for dx in (0, 1):
         for dz in (0, 1):
             if (v[dx, 0, dz] > 0) != (v[dx, 1, dz] > 0):
-                changes.append(V3(x + dx, y + adapt(v[dx, 0, dz], v[dx, 1, dz]), z + dz))
+                changes.append((x + dx, y + adapt(v[dx, 0, dz], v[dx, 1, dz]), z + dz))
 
     for dy in (0, 1):
         for dz in (0, 1):
             if (v[0, dy, dz] > 0) != (v[1, dy, dz] > 0):
-                changes.append(V3(x + adapt(v[0, dy, dz], v[1, dy, dz]), y + dy, z + dz))
+                changes.append((x + adapt(v[0, dy, dz], v[1, dy, dz]), y + dy, z + dz))
 
     if len(changes) <= 1:
         return None
@@ -47,13 +48,10 @@ def dual_contour_3d_find_best_vertex(f, f_normal, x, y, z):
 
     normals = []
     for v in changes:
-        n = f_normal(v.x, v.y, v.z)
+        n = f_normal(v[0], v[1], v[2])
         normals.append([n.x, n.y, n.z])
 
-    A = np.array(normals)
-    b = [v.x*n[0]+v.y*n[1]+v.z*n[2] for v, n in zip(changes, normals)]
-    result, residual, rank, s = np.linalg.lstsq(A, b)
-    return V3(result[0], result[1], result[2])
+    return solve_qef_3d(x, y, z, changes, normals)
 
 
 def dual_contour_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=ZMIN, zmax=ZMAX):
@@ -118,6 +116,11 @@ def circle_normal(x, y, z):
     l = math.sqrt(x*x + y*y + z*z)
     return V3(-x / l, -y / l, -z / l)
 
+def intersect_function(x, y, z):
+    y -= 0.3
+    x -= 0.5
+    x = abs(x)
+    return min(x - y, x + y)
 
 def normal_from_function(f, d=0.01):
     """Given a sufficiently smooth 3d function, f, returns a function approximating of the gradient of f.
@@ -133,6 +136,6 @@ def normal_from_function(f, d=0.01):
 __all__ = ["dual_contour_3d"]
 
 if __name__ == "__main__":
-    mesh = dual_contour_3d(circle_function, circle_normal)
+    mesh = dual_contour_3d(intersect_function, normal_from_function(intersect_function))
     with open("output.obj", "w") as f:
         make_obj(f, mesh)
