@@ -2,11 +2,7 @@ import numpy
 import numpy.linalg
 
 from utils_2d import V2
-
-CLIP = False
-BOUNDARY = True
-BIAS = True
-BIAS_STRENGTH = 0.01
+import settings
 
 
 class QEF:
@@ -79,7 +75,7 @@ def solve_qef_2d(x, y, positions, normals):
     # This is demonstration code and isn't optimized, there are many good C++ implementations
     # out there if you need speed.
 
-    if BIAS:
+    if settings.BIAS:
         # Add extra normals that add extra error the further we go
         # from the cell, this encourages the final result to be
         # inside the cell
@@ -91,16 +87,16 @@ def solve_qef_2d(x, y, positions, normals):
         # pull towards.
         mass_point = numpy.mean(positions, axis=0)
 
-        normals.append([BIAS_STRENGTH, 0])
+        normals.append([settings.BIAS_STRENGTH, 0])
         positions.append(mass_point)
-        normals.append([0, BIAS_STRENGTH])
+        normals.append([0, settings.BIAS_STRENGTH])
         positions.append(mass_point)
 
     qef = QEF.make(positions, normals)
 
     residual, v = qef.solve()
 
-    if BOUNDARY:
+    if settings.BOUNDARY:
         def inside(r):
             return x <= r[1][0] <= x + 1 and y <= r[1][1] <= y + 1
 
@@ -130,7 +126,7 @@ def solve_qef_2d(x, y, positions, normals):
             # Pick the best of the available options
             residual, v = min(rs)
 
-    if CLIP:
+    if settings.CLIP:
         # Crudely force v to be inside the cell
         v[0] = numpy.clip(v[0], x, x + 1)
         v[1] = numpy.clip(v[1], y, y + 1)
