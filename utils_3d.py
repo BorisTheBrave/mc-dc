@@ -1,5 +1,6 @@
 """Contains utilities common to 3d meshing methods"""
 
+import math
 
 class V3:
     """A vector in 3D space"""
@@ -7,6 +8,10 @@ class V3:
         self.x = x
         self.y = y
         self.z = z
+
+    def normalize(self):
+        d = math.sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
+        return V3(self.x / d, self.y / d, self.z / d)
 
 class Tri:
     """A 3d triangle"""

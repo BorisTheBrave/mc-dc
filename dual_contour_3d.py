@@ -130,7 +130,7 @@ def normal_from_function(f, d=0.01):
             (f(x + d, y, z) - f(x - d, y, z)) / 2 / d,
             (f(x, y + d, z) - f(x, y - d, z)) / 2 / d,
             (f(x, y, z + d) - f(x, y, z - d)) / 2 / d,
-        )
+        ).normalize()
     return norm
 
 __all__ = ["dual_contour_3d"]
