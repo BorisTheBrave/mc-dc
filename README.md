@@ -1,4 +1,4 @@
-This is demonstration code to accompany a series of articles on meshing. Please consult those
+This is demonstration code to accompany a <a href="http://www.boristhebrave.com/2018/04/15/marching-cubes-tutorial/">series</a> <a href="http://www.boristhebrave.com/2018/04/15/marching-cubes-3d-tutorial/">of</a> <a href="http://www.boristhebrave.com/2018/04/15/dual-contouring-tutorial/">articles</a> on meshing. Please consult those
 articles for more details.
 
 It covers how to implement 2d / 3d Marching Cubes and Dual Contouring. 
