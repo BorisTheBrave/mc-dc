@@ -17,7 +17,7 @@ def marching_cubes_2d_single_cell(f, x, y):
     x1y1 = f(x + 1.0, y + 1.0)
 
     # There are 16 different cases that these points can be inside or outside.
-	# We use binary counting to map the 4 truth values to a number between 0 and 15 inclusive.
+    # We use binary counting to map the 4 truth values to a number between 0 and 15 inclusive.
     # It's even more in the 3d case!
     case = ((1 if x0y0 > 0 else 0) +
             (2 if x0y1 > 0 else 0) +
@@ -27,8 +27,8 @@ def marching_cubes_2d_single_cell(f, x, y):
     # Several of the cases are inverses of each other where solid is non solid and visa versa
     # They have the same boundary, which cuts down the cases a bit.
     # But we swap the direction of the boundary, so that edges are always winding clockwise around the solid.
-	# Getting those swaps correct isn't needed for our simple visualizations, but is important in other uses cases
-	# particularly in 3d.
+    # Getting those swaps correct isn't needed for our simple visualizations, but is important in other uses cases
+    # particularly in 3d.
 
     if case is 0 or case is 15:
         # All outside / inside
@@ -38,16 +38,16 @@ def marching_cubes_2d_single_cell(f, x, y):
         return [Edge(V2(x+0+adapt(x0y0, x1y0), y), V2(x+0, y+adapt(x0y0, x0y1))).swap(case is 14)]
     if case is 2 or case is 13:
         # Single corner
-        return [Edge(V2(x + 0, y + adapt(x0y0, x0y1)), V2(x + adapt(x0y1, x1y1), y + 1)).swap(case is 11)]
+        return [Edge(V2(x + 0, y + adapt(x0y0, x0y1)), V2(x + adapt(x0y1, x1y1), y + 1)).swap(case is 13)]
     if case is 4 or case is 11:
         # Single corner
-        return [Edge(V2(x + 1, y + adapt(x1y0, x1y1)), V2(x + adapt(x0y0, x1y0), y + 0)).swap(case is 13)]
+        return [Edge(V2(x + 1, y + adapt(x1y0, x1y1)), V2(x + adapt(x0y0, x1y0), y + 0)).swap(case is 11)]
     if case is 8 or case is 7:
         # Single corner
         return [Edge(V2(x+adapt(x0y1, x1y1), y+1), V2(x+1, y+adapt(x1y0, x1y1))).swap(case is 7)]
     if case is 3 or case is 12:
         # Vertical split
-        return [Edge(V2(x+adapt(x0y0, x1y0), y+0), V2(x+adapt(x0y1, x1y1), y+1)).swap(case is 10)]
+        return [Edge(V2(x+adapt(x0y0, x1y0), y+0), V2(x+adapt(x0y1, x1y1), y+1)).swap(case is 12)]
     if case is 5 or case is 10:
         # Horizontal split
         return [Edge(V2(x+0, y+adapt(x0y0, x0y1)), V2(x+1, y+adapt(x1y0, x1y1))).swap(case is 5)]
