@@ -73,7 +73,7 @@ def dual_contour_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmi
     faces = []
     for x in range(xmin, xmax):
         for y in range(ymin, ymax):
-            for z in range(ymin, ymax):
+            for z in range(zmin, zmax):
                 if x > xmin and y > ymin:
                     solid1 = f(x, y, z + 0) > 0
                     solid2 = f(x, y, z + 1) > 0
