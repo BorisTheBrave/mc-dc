@@ -54,7 +54,7 @@ class QEF:
     def solve(self):
         """Finds the point that minimizes the error of this QEF,
         and returns a tuple of the error squared and the point itself"""
-        result, residual, rank, s = numpy.linalg.lstsq(self.A, self.b)
+        result, residual, rank, s = numpy.linalg.lstsq(self.A, self.b, rcond=None)
         if len(residual) == 0:
             residual = self.evaluate(result)
         else:
