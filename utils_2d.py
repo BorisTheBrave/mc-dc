@@ -29,28 +29,30 @@ def make_svg(file, edges, f):
     file.write("<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='{} {} {} {}'>\n".format(
         XMIN*scale, YMIN*scale, (XMAX-XMIN)*scale, (YMAX-YMIN)*scale))
 
+    file.write("<g transform='scale({})'>\n".format(scale))
     # Draw grid
     for x in range(XMIN, XMAX):
         for y in range(YMIN, YMAX):
-            file.write(element("rect", x=x*scale, y=y*scale, width=scale, height=scale,
-                               style="stroke: grey; stoke-width: 1; fill: none"))
+            file.write(element("rect", x=x, y=y, width=1, height=1,
+                               style="stroke: grey; stroke-width: 0.02; fill: none"))
 
     # Draw filled / unfilled circles
     for x in range(XMIN, XMAX+1):
         for y in range(YMIN, YMAX+1):
             is_solid = f(x, y) > 0
             fill_color = ("black" if is_solid else "white")
-            file.write(element("circle", cx=x*scale, cy=y*scale, r=0.05*scale,
-                               style="stroke: black; stoke-width: 1; fill: " + fill_color))
+            file.write(element("circle", cx=x, cy=y, r=0.05,
+                               style="stroke: black; stroke-width: 0.02; fill: " + fill_color))
     # Draw edges
     for edge in edges:
-        file.write(element("line", x1=edge.v1.x*scale, y1=edge.v1.y*scale, x2=edge.v2.x*scale, y2=edge.v2.y*scale,
-                           style='stroke:rgb(255,0,0);stroke-width:2'))
+        file.write(element("line", x1=edge.v1.x, y1=edge.v1.y, x2=edge.v2.x, y2=edge.v2.y,
+                           style='stroke:rgb(255,0,0);stroke-width:0.04'))
 
     # Draw vertices
     r = 0.05
     for v in [v for edge in edges for v in (edge.v1, edge.v2) ]:
-        file.write(element("rect", x=(v.x-r)*scale, y=(v.y-r)*scale, width=2*r*scale, height=2*r*scale,
+        file.write(element("rect", x=(v.x-r), y=(v.y-r), width=2*r, height=2*r,
                            style='fill: red'))
 
+    file.write("</g>\n")
     file.write("</svg>\n")
