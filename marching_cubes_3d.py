@@ -1,7 +1,7 @@
 """Provides a function for performing 3D Marching Cubes"""
 
-from common import adapt
-from settings import XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
+from common import adapt, frange
+from settings import XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX, CELL_SIZE
 import math
 from utils_3d import V3, Tri, Mesh, make_obj
 
@@ -303,7 +303,9 @@ def marching_cubes_3d_single_cell(f, x, y, z):
     f_eval = [None] * 8
     for v in range(8):
         v_pos = VERTICES[v]
-        f_eval[v] = f(x + v_pos[0], y + v_pos[1], z + v_pos[2])
+        f_eval[v] = f(x + v_pos[0] * CELL_SIZE,
+                      y + v_pos[1] * CELL_SIZE,
+                      z + v_pos[2] * CELL_SIZE)
     # Determine which case we are
     case = sum(2**v for v in range(8) if f_eval[v] > 0)
     # Ok, what faces do we need (in terms of edges)
@@ -316,8 +318,8 @@ def marching_cubes_3d_single_cell(f, x, y, z):
         v0, v1 = EDGES[edge]
         f0 = f_eval[v0]
         f1 = f_eval[v1]
-        t0 = 1 - adapt(f0, f1)
-        t1 = 1 - t0
+        t0 = CELL_SIZE - adapt(f0, f1)
+        t1 = CELL_SIZE - t0
         vert_pos0 = VERTICES[v0]
         vert_pos1 = VERTICES[v1]
         return V3(x + vert_pos0[0] * t0 + vert_pos1[0] * t1,
@@ -350,9 +352,9 @@ def marching_cubes_3d(f, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmin=ZMIN, 
     # For each cube, evaluate independently.
     # If this wasn't demonstration code, you might actually evaluate them together for efficiency
     mesh = Mesh()
-    for x in range(xmin, xmax):
-        for y in range(ymin, ymax):
-            for z in range(zmin, zmax):
+    for x in frange(xmin, xmax, CELL_SIZE):
+        for y in frange(ymin, ymax, CELL_SIZE):
+            for z in frange(zmin, zmax, CELL_SIZE):
                 cell_mesh = marching_cubes_3d_single_cell(f, x, y, z)
                 mesh.extend(cell_mesh)
     return mesh
@@ -372,6 +374,7 @@ def make_circle_obj(filename):
 def make_cases_obj():
     """Writes obj files demonstrating the main cases of marching cubes"""
     import marching_cubes_gen as gen
+    assert CELL_SIZE == 1
     mesh = Mesh()
     highlights = Mesh()
     offset = V3(0, 0, 0)
@@ -382,7 +385,7 @@ def make_cases_obj():
         def f(x, y, z):
             vert = gen.VERTICES.index((x, y, z))
             return 1 if vert in verts else -1
-        case_mesh = marching_cubes_3d_single_cell(f, 0, 0, 0)
+        case_mesh = marching_cubes_3d_single_cell(f, 0, 0, 0, cell_size=1)
         case_mesh = case_mesh.translate(offset)
         mesh.extend(case_mesh)
 
@@ -405,4 +408,4 @@ __all__ = ["marching_cubes_3d"]
 
 if __name__ == "__main__":
     make_circle_obj("output.obj")
-    make_cases_obj()
+    #make_cases_obj()

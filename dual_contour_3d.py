@@ -1,7 +1,7 @@
 """Provides a function for performing 3D Dual Countouring"""
 
-from common import adapt
-from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX
+from common import adapt, frange
+from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX, CELL_SIZE
 import numpy as np
 import math
 from utils_3d import V3, Quad, Mesh, make_obj
@@ -10,14 +10,14 @@ from qef import solve_qef_3d
 
 def dual_contour_3d_find_best_vertex(f, f_normal, x, y, z):
     if not ADAPTIVE:
-        return V3(x+0.5, y+0.5, z+0.5)
+        return V3(x+0.5*CELL_SIZE, y+0.5*CELL_SIZE, z+0.5*CELL_SIZE)
 
     # Evaluate f at each corner
     v = np.empty((2, 2, 2))
     for dx in (0, 1):
         for dy in (0, 1):
             for dz in (0,1):
-                v[dx, dy, dz] = f(x + dx, y + dy, z + dz)
+                v[dx, dy, dz] = f(x + dx * CELL_SIZE, y + dy * CELL_SIZE, z + dz * CELL_SIZE)
 
     # For each edge, identify where there is a sign change.
     # There are 4 edges along each of the three axes
@@ -25,17 +25,23 @@ def dual_contour_3d_find_best_vertex(f, f_normal, x, y, z):
     for dx in (0, 1):
         for dy in (0, 1):
             if (v[dx, dy, 0] > 0) != (v[dx, dy, 1] > 0):
-                changes.append((x + dx, y + dy, z + adapt(v[dx, dy, 0], v[dx, dy, 1])))
+                changes.append((x + dx * CELL_SIZE, 
+                                y + dy * CELL_SIZE,
+                                z + adapt(v[dx, dy, 0],v[dx, dy, 1])))
 
     for dx in (0, 1):
         for dz in (0, 1):
             if (v[dx, 0, dz] > 0) != (v[dx, 1, dz] > 0):
-                changes.append((x + dx, y + adapt(v[dx, 0, dz], v[dx, 1, dz]), z + dz))
+                changes.append((x + dx * CELL_SIZE,
+                                y + adapt(v[dx, 0, dz], v[dx, 1, dz]),
+                                z + dz * CELL_SIZE))
 
     for dy in (0, 1):
         for dz in (0, 1):
             if (v[0, dy, dz] > 0) != (v[1, dy, dz] > 0):
-                changes.append((x + adapt(v[0, dy, dz], v[1, dy, dz]), y + dy, z + dz))
+                changes.append((x + adapt(v[0, dy, dz], v[1, dy, dz]),
+                                y + dy * CELL_SIZE,
+                                z + dz * CELL_SIZE))
 
     if len(changes) <= 1:
         return None
@@ -60,49 +66,49 @@ def dual_contour_3d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX, zmi
     # For each cell, find the the best vertex for fitting f
     vert_array = []
     vert_indices = {}
-    for x in range(xmin, xmax):
-        for y in range(ymin, ymax):
-            for z in range(zmin, zmax):
+    for ix, x in enumerate(frange(xmin, xmax, CELL_SIZE)):
+        for iy, y in enumerate(frange(ymin, ymax, CELL_SIZE)):
+            for iz, z in enumerate(frange(zmin, zmax, CELL_SIZE)):
                 vert = dual_contour_3d_find_best_vertex(f, f_normal, x, y, z)
                 if vert is None:
                     continue
                 vert_array.append(vert)
-                vert_indices[(x, y, z)] = len(vert_array)
+                vert_indices[ix, iy, iz] = len(vert_array)
 
     # For each cell edge, emit an face between the center of the adjacent cells if it is a sign changing edge
     faces = []
-    for x in range(xmin, xmax):
-        for y in range(ymin, ymax):
-            for z in range(zmin, zmax):
+    for ix, x in enumerate(frange(xmin, xmax, CELL_SIZE)):
+        for iy, y in enumerate(frange(ymin, ymax, CELL_SIZE)):
+            for iz, z in enumerate(frange(zmin, zmax, CELL_SIZE)):
                 if x > xmin and y > ymin:
                     solid1 = f(x, y, z + 0) > 0
-                    solid2 = f(x, y, z + 1) > 0
+                    solid2 = f(x, y, z + CELL_SIZE) > 0
                     if solid1 != solid2:
                         faces.append(Quad(
-                            vert_indices[(x - 1, y - 1, z)],
-                            vert_indices[(x - 0, y - 1, z)],
-                            vert_indices[(x - 0, y - 0, z)],
-                            vert_indices[(x - 1, y - 0, z)],
+                            vert_indices[(ix - 1, iy - 1, iz)],
+                            vert_indices[(ix - 0, iy - 1, iz)],
+                            vert_indices[(ix - 0, iy - 0, iz)],
+                            vert_indices[(ix - 1, iy - 0, iz)],
                         ).swap(solid2))
                 if x > xmin and z > zmin:
                     solid1 = f(x, y + 0, z) > 0
-                    solid2 = f(x, y + 1, z) > 0
+                    solid2 = f(x, y + CELL_SIZE, z) > 0
                     if solid1 != solid2:
                         faces.append(Quad(
-                            vert_indices[(x - 1, y, z - 1)],
-                            vert_indices[(x - 0, y, z - 1)],
-                            vert_indices[(x - 0, y, z - 0)],
-                            vert_indices[(x - 1, y, z - 0)],
+                            vert_indices[(ix - 1, iy, iz - 1)],
+                            vert_indices[(ix - 0, iy, iz - 1)],
+                            vert_indices[(ix - 0, iy, iz - 0)],
+                            vert_indices[(ix - 1, iy, iz - 0)],
                         ).swap(solid1))
                 if y > ymin and z > zmin:
                     solid1 = f(x + 0, y, z) > 0
-                    solid2 = f(x + 1, y, z) > 0
+                    solid2 = f(x + CELL_SIZE, y, z) > 0
                     if solid1 != solid2:
                         faces.append(Quad(
-                            vert_indices[(x, y - 1, z - 1)],
-                            vert_indices[(x, y - 0, z - 1)],
-                            vert_indices[(x, y - 0, z - 0)],
-                            vert_indices[(x, y - 1, z - 0)],
+                            vert_indices[(ix, iy - 1, iz - 1)],
+                            vert_indices[(ix, iy - 0, iz - 1)],
+                            vert_indices[(ix, iy - 0, iz - 0)],
+                            vert_indices[(ix, iy - 1, iz - 0)],
                         ).swap(solid2))
 
     return Mesh(vert_array, faces)
