@@ -49,32 +49,33 @@ def dual_contour_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
     a boundary by Dual Contouring. Returns an unordered list of Edge objects."""
     # For each cell, find the the best vertex for fitting f
     verts = {}
-    for x in frange(xmin, xmax, CELL_SIZE):
-        for y in frange(ymin, ymax, CELL_SIZE):
-            verts[x, y] = dual_contour_2d_find_best_vertex(f, f_normal, x, y)
+    for ix, x in enumerate(frange(xmin, xmax, CELL_SIZE)):
+        for iy, y in enumerate(frange(ymin, ymax, CELL_SIZE)):
+            verts[ix, iy] = dual_contour_2d_find_best_vertex(f, f_normal, x, y)
     # For each cell edge, emit an edge between the center of the adjacent cells if it is a sign changing edge
     edges = []
     # Do all the vertical sign changes
-    for prevx in frange(xmin, xmax - CELL_SIZE, CELL_SIZE):
-        # Skip the leftmost edges, we need verts filled on both sides
-        x = prevx + CELL_SIZE
-        for y in frange(ymin, ymax, CELL_SIZE):
+    for ix, x in enumerate(frange(xmin, xmax, CELL_SIZE)):
+        if ix == 0:
+            continue
+        for iy, y in enumerate(frange(ymin, ymax, CELL_SIZE)):
             y0 = y
             y1 = y+CELL_SIZE
             y0_solid = f(x, y0) > 0
             y1_solid = f(x, y1) > 0
             if y0_solid != y1_solid:
-                edges.append(Edge(verts[prevx, y], verts[x, y]).swap(y0_solid))
+                edges.append(Edge(verts[ix - 1, iy], verts[ix, iy]).swap(y0_solid))
     # Do all the horizontal sign changes
-    for prevy in frange(ymin, ymax - CELL_SIZE, CELL_SIZE):
-        y = prevy + CELL_SIZE
-        for x in frange(xmin, xmax, CELL_SIZE):
+    for iy, y in enumerate(frange(ymin, ymax, CELL_SIZE)):
+        if iy == 0:
+            continue
+        for ix, x in enumerate(frange(xmin, xmax, CELL_SIZE)):
             x0 = x
             x1 = x+CELL_SIZE
             x0_solid = f(x0, y) > 0
             x1_solid = f(x1, y) > 0
             if x0_solid != x1_solid:
-                edges.append(Edge(verts[x, prevy], verts[x, y]).swap(x0_solid))
+                edges.append(Edge(verts[ix, iy-1], verts[ix, iy]).swap(x0_solid))
     return edges
 
 

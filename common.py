@@ -20,7 +20,7 @@ def adapt(v0, v1):
         return (0 - v0) / (v1 - v0) * settings.CELL_SIZE
     else:
         return 0.5 * settings.CELL_SIZE
-    
+
 def frange(start, stop, step=1):
     """Like range, but works for floats"""
     v = start
