@@ -84,6 +84,8 @@ def solve_qef_2d(x, y, positions, normals):
     # This is demonstration code and isn't optimized, there are many good C++ implementations
     # out there if you need speed.
 
+    CELL_SIZE = settings.CELL_SIZE
+
     if settings.BIAS:
         # Add extra normals that add extra error the further we go
         # from the cell, this encourages the final result to be
@@ -107,7 +109,7 @@ def solve_qef_2d(x, y, positions, normals):
 
     if settings.BOUNDARY:
         def inside(r):
-            return x <= r[1][0] <= x + 1 and y <= r[1][1] <= y + 1
+            return x <= r[1][0] <= x + CELL_SIZE and y <= r[1][1] <= y + CELL_SIZE
 
         # It's entirely possible that the best solution to the qef is not actually
         # inside the cell.
@@ -115,9 +117,9 @@ def solve_qef_2d(x, y, positions, normals):
             # If so, we constrain the the qef to the horizontal and vertical
             # lines bordering the cell, and find the best point of those
             r1 = qef.fix_axis(0, x + 0).solve()
-            r2 = qef.fix_axis(0, x + 1).solve()
+            r2 = qef.fix_axis(0, x + CELL_SIZE).solve()
             r3 = qef.fix_axis(1, y + 0).solve()
-            r4 = qef.fix_axis(1, y + 1).solve()
+            r4 = qef.fix_axis(1, y + CELL_SIZE).solve()
 
             rs = list(filter(inside, [r1, r2, r3, r4]))
 
@@ -126,9 +128,9 @@ def solve_qef_2d(x, y, positions, normals):
                 # cause solutions outside the box. So finally, we evaluate which corner
                 # of the cell looks best
                 r1 = qef.eval_with_pos((x + 0, y + 0))
-                r2 = qef.eval_with_pos((x + 0, y + 1))
-                r3 = qef.eval_with_pos((x + 1, y + 0))
-                r4 = qef.eval_with_pos((x + 1, y + 1))
+                r2 = qef.eval_with_pos((x + 0, y + CELL_SIZE))
+                r3 = qef.eval_with_pos((x + CELL_SIZE, y + 0))
+                r4 = qef.eval_with_pos((x + CELL_SIZE, y + CELL_SIZE))
 
                 rs = list(filter(inside, [r1, r2, r3, r4]))
 
@@ -137,8 +139,8 @@ def solve_qef_2d(x, y, positions, normals):
 
     if settings.CLIP:
         # Crudely force v to be inside the cell
-        v[0] = numpy.clip(v[0], x, x + 1)
-        v[1] = numpy.clip(v[1], y, y + 1)
+        v[0] = numpy.clip(v[0], x, x + CELL_SIZE)
+        v[1] = numpy.clip(v[1], y, y + CELL_SIZE)
 
     return V2(v[0], v[1])
 

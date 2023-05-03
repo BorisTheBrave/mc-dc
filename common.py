@@ -17,6 +17,14 @@ def adapt(v0, v1):
     """v0 and v1 are numbers of opposite sign. This returns how far you need to interpolate from v0 to v1 to get to 0."""
     assert (v1 > 0) != (v0 > 0), "v0 and v1 do not have opposite sign"
     if settings.ADAPTIVE:
-        return (0 - v0) / (v1 - v0)
+        return (0 - v0) / (v1 - v0) * settings.CELL_SIZE
     else:
-        return 0.5
+        return 0.5 * settings.CELL_SIZE
+    
+def frange(start, stop, step=1):
+    """Like range, but works for floats"""
+    v = start
+    while v < stop:
+        yield v
+        v += step
+

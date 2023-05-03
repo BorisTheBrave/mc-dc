@@ -3,32 +3,32 @@
 import math
 
 
-from common import Edge, adapt
-from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX
+from common import Edge, adapt, frange
+from settings import ADAPTIVE, XMIN, XMAX, YMIN, YMAX, CELL_SIZE
 from utils_2d import V2, make_svg
 from qef import solve_qef_2d
 
 
 def dual_contour_2d_find_best_vertex(f, f_normal, x, y):
     if not ADAPTIVE:
-        return V2(x+0.5, y+0.5)
+        return V2(x+0.5 * CELL_SIZE, y+0.5 * CELL_SIZE)
 
     # Evaluate
     x0y0 = f(x + 0.0, y + 0.0)
-    x0y1 = f(x + 0.0, y + 1.0)
-    x1y0 = f(x + 1.0, y + 0.0)
-    x1y1 = f(x + 1.0, y + 1.0)
+    x0y1 = f(x + 0.0, y + CELL_SIZE)
+    x1y0 = f(x + CELL_SIZE, y + 0.0)
+    x1y1 = f(x + CELL_SIZE, y + CELL_SIZE)
 
     # For each edge, identify where there is a sign change
     changes = []
     if (x0y0 > 0) != (x0y1 > 0):
         changes.append([x + 0, y + adapt(x0y0, x0y1)])
     if (x1y0 > 0) != (x1y1 > 0):
-        changes.append([x + 1, y + adapt(x1y0, x1y1)])
+        changes.append([x + CELL_SIZE, y + adapt(x1y0, x1y1)])
     if (x0y0 > 0) != (x1y0 > 0):
         changes.append([x + adapt(x0y0, x1y0), y + 0])
     if (x0y1 > 0) != (x1y1 > 0):
-        changes.append([x + adapt(x0y1, x1y1), y + 1])
+        changes.append([x + adapt(x0y1, x1y1), y + CELL_SIZE])
 
     if len(changes) <= 1:
         return None
@@ -49,27 +49,32 @@ def dual_contour_2d(f, f_normal, xmin=XMIN, xmax=XMAX, ymin=YMIN, ymax=YMAX):
     a boundary by Dual Contouring. Returns an unordered list of Edge objects."""
     # For each cell, find the the best vertex for fitting f
     verts = {}
-    for x in range(xmin, xmax):
-        for y in range(ymin, ymax):
-            verts[(x,y)] = dual_contour_2d_find_best_vertex(f, f_normal, x, y)
+    for x in frange(xmin, xmax, CELL_SIZE):
+        for y in frange(ymin, ymax, CELL_SIZE):
+            verts[x, y] = dual_contour_2d_find_best_vertex(f, f_normal, x, y)
     # For each cell edge, emit an edge between the center of the adjacent cells if it is a sign changing edge
     edges = []
-    for x in range(xmin+1, xmax):
-        for y in range(ymin, ymax):
+    # Do all the vertical sign changes
+    for prevx in frange(xmin, xmax - CELL_SIZE, CELL_SIZE):
+        # Skip the leftmost edges, we need verts filled on both sides
+        x = prevx + CELL_SIZE
+        for y in frange(ymin, ymax, CELL_SIZE):
             y0 = y
-            y1 = y+1
+            y1 = y+CELL_SIZE
             y0_solid = f(x, y0) > 0
             y1_solid = f(x, y1) > 0
             if y0_solid != y1_solid:
-                edges.append(Edge(verts[(x-1, y)], verts[x, y]).swap(y0_solid))
-    for x in range(xmin, xmax):
-        for y in range(ymin+1, ymax):
+                edges.append(Edge(verts[prevx, y], verts[x, y]).swap(y0_solid))
+    # Do all the horizontal sign changes
+    for prevy in frange(ymin, ymax - CELL_SIZE, CELL_SIZE):
+        y = prevy + CELL_SIZE
+        for x in frange(xmin, xmax, CELL_SIZE):
             x0 = x
-            x1 = x+1
+            x1 = x+CELL_SIZE
             x0_solid = f(x0, y) > 0
             x1_solid = f(x1, y) > 0
             if x0_solid != x1_solid:
-                edges.append(Edge(verts[(x, y-1)], verts[x, y]).swap(x0_solid))
+                edges.append(Edge(verts[x, prevy], verts[x, y]).swap(x0_solid))
     return edges
 
 
@@ -121,7 +126,6 @@ def intersect_function(x, y):
 __all__ = ["dual_contour_2d"]
 
 if __name__ == "__main__":
-    edges = dual_contour_2d(intersect_function, normal_from_function(intersect_function, 0.001))
+    edges = dual_contour_2d(circle_function, circle_normal)
     with open("example.svg", "w") as file:
-        make_svg(file, edges, intersect_function)
-
+        make_svg(file, edges, circle_function)

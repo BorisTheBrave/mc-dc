@@ -24,3 +24,9 @@ YMIN = -3
 YMAX = 3
 ZMIN = -3
 ZMAX = 3
+
+# Size of grid
+CELL_SIZE = 1
+
+# Small value used to avoid floating point issues.
+EPS = 1e-8

@@ -1,6 +1,7 @@
 """Contains utilities common to 2d meshing methods"""
 
-from settings import XMIN, XMAX, YMIN, YMAX
+from settings import XMIN, XMAX, YMIN, YMAX, CELL_SIZE, EPS
+from common import frange
 import math
 
 class V2:
@@ -31,14 +32,14 @@ def make_svg(file, edges, f):
 
     file.write("<g transform='scale({})'>\n".format(scale))
     # Draw grid
-    for x in range(XMIN, XMAX):
-        for y in range(YMIN, YMAX):
-            file.write(element("rect", x=x, y=y, width=1, height=1,
+    for x in frange(XMIN, XMAX, CELL_SIZE):
+        for y in frange(YMIN, YMAX, CELL_SIZE):
+            file.write(element("rect", x=x, y=y, width=CELL_SIZE, height=CELL_SIZE,
                                style="stroke: grey; stroke-width: 0.02; fill: none"))
 
     # Draw filled / unfilled circles
-    for x in range(XMIN, XMAX+1):
-        for y in range(YMIN, YMAX+1):
+    for x in frange(XMIN, XMAX+CELL_SIZE, CELL_SIZE):
+        for y in frange(YMIN, YMAX+CELL_SIZE, CELL_SIZE):
             is_solid = f(x, y) > 0
             fill_color = ("black" if is_solid else "white")
             file.write(element("circle", cx=x, cy=y, r=0.05,
