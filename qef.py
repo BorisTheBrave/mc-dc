@@ -157,6 +157,8 @@ def solve_qef_3d(x, y, z, positions, normals):
     # This is demonstration code and isn't optimized, there are many good C++ implementations
     # out there if you need speed.
 
+    CELL_SIZE = settings.CELL_SIZE
+
     if settings.BIAS:
         # Add extra normals that add extra error the further we go
         # from the cell, this encourages the final result to be
@@ -182,7 +184,7 @@ def solve_qef_3d(x, y, z, positions, normals):
 
     if settings.BOUNDARY:
         def inside(r):
-            return x <= r[1][0] <= x + 1 and y <= r[1][1] <= y + 1 and z <= r[1][2] <= z + 1
+            return x <= r[1][0] <= x + CELL_SIZE and y <= r[1][1] <= y + CELL_SIZE and z <= r[1][2] <= z + CELL_SIZE
 
         # It's entirely possible that the best solution to the qef is not actually
         # inside the cell.
@@ -190,11 +192,11 @@ def solve_qef_3d(x, y, z, positions, normals):
             # If so, we constrain the the qef to the 6
             # planes bordering the cell, and find the best point of those
             r1 = qef.fix_axis(0, x + 0).solve()
-            r2 = qef.fix_axis(0, x + 1).solve()
+            r2 = qef.fix_axis(0, x + CELL_SIZE).solve()
             r3 = qef.fix_axis(1, y + 0).solve()
-            r4 = qef.fix_axis(1, y + 1).solve()
+            r4 = qef.fix_axis(1, y + CELL_SIZE).solve()
             r5 = qef.fix_axis(2, z + 0).solve()
-            r6 = qef.fix_axis(2, z + 1).solve()
+            r6 = qef.fix_axis(2, z + CELL_SIZE).solve()
 
             rs = list(filter(inside, [r1, r2, r3, r4, r5, r6]))
 
@@ -203,17 +205,17 @@ def solve_qef_3d(x, y, z, positions, normals):
                 # cause solutions outside the box.
                 # So now try the 12 lines bordering the cell
                 r1  = qef.fix_axis(1, y + 0).fix_axis(0, x + 0).solve()
-                r2  = qef.fix_axis(1, y + 1).fix_axis(0, x + 0).solve()
-                r3  = qef.fix_axis(1, y + 0).fix_axis(0, x + 1).solve()
-                r4  = qef.fix_axis(1, y + 1).fix_axis(0, x + 1).solve()
+                r2  = qef.fix_axis(1, y + CELL_SIZE).fix_axis(0, x + 0).solve()
+                r3  = qef.fix_axis(1, y + 0).fix_axis(0, x + CELL_SIZE).solve()
+                r4  = qef.fix_axis(1, y + CELL_SIZE).fix_axis(0, x + CELL_SIZE).solve()
                 r5  = qef.fix_axis(2, z + 0).fix_axis(0, x + 0).solve()
-                r6  = qef.fix_axis(2, z + 1).fix_axis(0, x + 0).solve()
-                r7  = qef.fix_axis(2, z + 0).fix_axis(0, x + 1).solve()
-                r8  = qef.fix_axis(2, z + 1).fix_axis(0, x + 1).solve()
+                r6  = qef.fix_axis(2, z + CELL_SIZE).fix_axis(0, x + 0).solve()
+                r7  = qef.fix_axis(2, z + 0).fix_axis(0, x + CELL_SIZE).solve()
+                r8  = qef.fix_axis(2, z + CELL_SIZE).fix_axis(0, x + CELL_SIZE).solve()
                 r9  = qef.fix_axis(2, z + 0).fix_axis(1, y + 0).solve()
-                r10 = qef.fix_axis(2, z + 1).fix_axis(1, y + 0).solve()
-                r11 = qef.fix_axis(2, z + 0).fix_axis(1, y + 1).solve()
-                r12 = qef.fix_axis(2, z + 1).fix_axis(1, y + 1).solve()
+                r10 = qef.fix_axis(2, z + CELL_SIZE).fix_axis(1, y + 0).solve()
+                r11 = qef.fix_axis(2, z + 0).fix_axis(1, y + CELL_SIZE).solve()
+                r12 = qef.fix_axis(2, z + CELL_SIZE).fix_axis(1, y + CELL_SIZE).solve()
 
                 rs = list(filter(inside, [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12]))
 
@@ -221,13 +223,13 @@ def solve_qef_3d(x, y, z, positions, normals):
                 # So finally, we evaluate which corner
                 # of the cell looks best
                 r1 = qef.eval_with_pos((x + 0, y + 0, z + 0))
-                r2 = qef.eval_with_pos((x + 0, y + 0, z + 1))
-                r3 = qef.eval_with_pos((x + 0, y + 1, z + 0))
-                r4 = qef.eval_with_pos((x + 0, y + 1, z + 1))
-                r5 = qef.eval_with_pos((x + 1, y + 0, z + 0))
-                r6 = qef.eval_with_pos((x + 1, y + 0, z + 1))
-                r7 = qef.eval_with_pos((x + 1, y + 1, z + 0))
-                r8 = qef.eval_with_pos((x + 1, y + 1, z + 1))
+                r2 = qef.eval_with_pos((x + 0, y + 0, z + CELL_SIZE))
+                r3 = qef.eval_with_pos((x + 0, y + CELL_SIZE, z + 0))
+                r4 = qef.eval_with_pos((x + 0, y + CELL_SIZE, z + CELL_SIZE))
+                r5 = qef.eval_with_pos((x + CELL_SIZE, y + 0, z + 0))
+                r6 = qef.eval_with_pos((x + CELL_SIZE, y + 0, z + CELL_SIZE))
+                r7 = qef.eval_with_pos((x + CELL_SIZE, y + CELL_SIZE, z + 0))
+                r8 = qef.eval_with_pos((x + CELL_SIZE, y + CELL_SIZE, z + CELL_SIZE))
 
                 rs = list(filter(inside, [r1, r2, r3, r4, r5, r6, r7, r8]))
 
@@ -236,8 +238,8 @@ def solve_qef_3d(x, y, z, positions, normals):
 
     if settings.CLIP:
         # Crudely force v to be inside the cell
-        v[0] = numpy.clip(v[0], x, x + 1)
-        v[1] = numpy.clip(v[1], y, y + 1)
-        v[2] = numpy.clip(v[2], z, z + 1)
+        v[0] = numpy.clip(v[0], x, x + CELL_SIZE)
+        v[1] = numpy.clip(v[1], y, y + CELL_SIZE)
+        v[2] = numpy.clip(v[2], z, z + CELL_SIZE)
 
     return V3(v[0], v[1], v[2])

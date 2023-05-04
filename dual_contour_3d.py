@@ -142,6 +142,6 @@ def normal_from_function(f, d=0.01):
 __all__ = ["dual_contour_3d"]
 
 if __name__ == "__main__":
-    mesh = dual_contour_3d(intersect_function, normal_from_function(intersect_function))
+    mesh = dual_contour_3d(circle_function, normal_from_function(circle_function))
     with open("output.obj", "w") as f:
         make_obj(f, mesh)
